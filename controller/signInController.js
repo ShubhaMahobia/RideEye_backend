@@ -116,3 +116,13 @@ exports.resendOTP = async(req,res) =>{
         res.status(400).json({ success: false, message: error.message });
     }
 }
+
+//Removing Unverified users - 
+exports.removingUnverifiedEMails = async(res) => {
+    try {
+        await User.deleteMany({verified: false}); 
+        console.log("Unverified Account Deleted");
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
