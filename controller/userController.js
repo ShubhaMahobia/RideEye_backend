@@ -1,6 +1,10 @@
 const express = require('express');
 const User = require('../models/userModel');
-
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+const UserOTPVerification = require('../models/userVerificationModel');
+const hbs = require('nodemailer-express-handlebars');
+const { sendOtpVerificationEmail } = require('./signInController');
 
 //Fetch All User Function
 exports.fetchAllUsers = async(req,res) =>{
@@ -22,7 +26,8 @@ exports.registerUser = async(req,res) => {
         phoneNumber : req.body.phoneNumber,
         address : req.body.address,
         busNumber : req.body.busNumber,
-        scholarNumber : req.body.scholarNumber,   
+        scholarNumber : req.body.scholarNumber,  
+        verified:false, 
     });
     try {
         const userExistEmail = await User.findOne({email:req.body.email});
@@ -34,11 +39,16 @@ exports.registerUser = async(req,res) => {
         if(userExistENo){
            return res.json( 'Enrollment Number Already Exist'); 
         }
-        await user.save(); //SAVE COMMAND
-        
-        return  res.status(201).json({success: true, message: 'New user has been created'});    
+        await user.save().then((result) =>{
+           sendOtpVerificationEmail(result,res);
+        }); //SAVE COMMAND
+      
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
-        console.log(error);
     }
 }
+
+
+
+
+
