@@ -20,10 +20,10 @@ transporter.use('compile',hbs({
     viewPath: './views/'
 }));
 
-
+//Send OTP Function
 exports.sendOtpVerificationEmail = async ({_id,email,fullName},res) => {
     try {
-        const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`; //generating OTP
         const mailOption = {
             from: "mahobiashubham4@gmail.com",
             to: email,
@@ -36,13 +36,13 @@ exports.sendOtpVerificationEmail = async ({_id,email,fullName},res) => {
         };
         transporter.close();
 
-        //Hashing the OTP - 
+        //Securing  the OTP - 
        const hashOTP = await bcrypt.hash(otp,12); 
        const newOtpVerification = await new UserOTPVerification({
         userId : _id,
         otp : hashOTP,
         createdAt: Date.now(),
-        expiresAt : Date.now() + 3600000,
+        expiresAt : Date.now() + 600000,
        });
 
        await newOtpVerification.save();
@@ -60,7 +60,7 @@ exports.sendOtpVerificationEmail = async ({_id,email,fullName},res) => {
 }
 
 
-
+//VerifyOTP Fucntion
 exports.verifyOTP = async(req,res) => {
     try {
         let{userId,otp} = req.body;
@@ -98,6 +98,21 @@ exports.verifyOTP = async(req,res) => {
             }
         }
     } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+//Resend OTP function
+exports.resendOTP = async(req,res) =>{
+    try {
+        let{userId,email} = req.body;
+        if(!userId || !email){
+            throw Error("Empty otp details are not allowed");
+        }else{
+            await UserOTPVerification.deleteMany({userId});
+            this.sendOtpVerificationEmail({_id:userId,email},res);
+        }
+    } catch (e) {
         res.status(400).json({ success: false, message: error.message });
     }
 }
