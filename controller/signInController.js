@@ -5,14 +5,15 @@ const bcrypt = require('bcryptjs');
 const UserOTPVerification = require('../models/userVerificationModel');
 const hbs = require('nodemailer-express-handlebars');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 
 //NODEMAILER 
 let transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: process.env.SMTP_HOST,
     auth : {
-        user: "mahobiashubham4@gmail.com",
-        pass: "hutufymgqfwvnzdh",
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASS,
     },
 });
 
@@ -26,7 +27,7 @@ exports.sendOtpVerificationEmail = async ({_id,email,fullName},res) => {
     try {
         const otp = `${Math.floor(1000 + Math.random() * 9000)}`; //generating OTP
         const mailOption = {
-            from: "mahobiashubham4@gmail.com",
+            from: process.env.SMTP_EMAIL,
             to: email,
             subject: "Verify Your Email",
             template:'verifyOTP',
@@ -43,7 +44,7 @@ exports.sendOtpVerificationEmail = async ({_id,email,fullName},res) => {
         userId : _id,
         otp : hashOTP,
         createdAt: Date.now(),
-        expiresAt : Date.now() + 600000,
+        expiresAt : Date.now() + 60000,
        });
 
        await newOtpVerification.save();
@@ -139,7 +140,7 @@ exports.signIn = async (req,res) => {
             if(!result){
             return res.status(401).json({message:"Password not correct"});
             }else{
-                const token = jwt.sign({email:user[0].email,userId:user[0]._id},'81012BB9A64888F4A27786E63DF9B5A65DBD04398402026F67D3B2525DFEDB2E',{expiresIn:"24h"});
+                const token = jwt.sign({email:user[0].email,userId:user[0]._id},process.env.SECRET_KEY,{expiresIn:process.env.JWT_TOKEN_EXPIRY});
                 res.status(200).json({
                     email:user[0].email,
                     userId:user[0]._id,
