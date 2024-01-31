@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const UserOTPVerification = require('../models/userVerificationModel');
 const hbs = require('nodemailer-express-handlebars');
+const jwt = require('jsonwebtoken');
 
 
 //NODEMAILER 
@@ -125,4 +126,34 @@ exports.removingUnverifiedEMails = async(res) => {
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
+}
+
+//SignIn function - 
+exports.signIn = async (req,res) => {
+  try {
+    userExists = await User.find({email:req.body.email}).exec().then(user=>{
+        if(user.length<=0){
+            return res.status(401).json({message:"User not Found"});
+        }else{
+            bcrypt.compare(req.body.password,user[0].password,(err,result)=>{
+            if(!result){
+            return res.status(401).json({message:"Password not correct"});
+            }else{
+                const token = jwt.sign({email:user[0].email,userId:user[0]._id},'81012BB9A64888F4A27786E63DF9B5A65DBD04398402026F67D3B2525DFEDB2E',{expiresIn:"24h"});
+                res.status(200).json({
+                    email:user[0].email,
+                    userId:user[0]._id,
+                    token:token,
+                });
+            }
+
+            });
+        }
+    })
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+    
+
+    
 }
