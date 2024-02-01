@@ -27,8 +27,6 @@ jobs:
           echo JWT_TOKEN_EXPIRY = 24h >> .env
           echo SECRET_KEY = 81012BB9A64888F4A27786E63DF9B5A65DBD04398402026F67D3B2525DFEDB2E >> .env
           cat .env
-      - name: Running Node Application
-        run: node index.js
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
