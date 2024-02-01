@@ -3,6 +3,7 @@ const User = require('../models/userModel');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const UserOTPVerification = require('../models/userVerificationModel');
+const forgotPasswordOTPModel = require('../models/forgotPasswordOTP');
 const hbs = require('nodemailer-express-handlebars');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -94,7 +95,7 @@ exports.verifyOTP = async(req,res) => {
                         await UserOTPVerification.deleteMany({userId});
                         return res.json({
                             message:"Email Verified Successfully",
-                        })
+                        });
                     }
                 }
             }
@@ -153,8 +154,109 @@ exports.signIn = async (req,res) => {
     })
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
-  }
-    
-
-    
+  }   
 }
+//FORGOT PASSWORD FUNCTION - 
+exports.sendPasswordOTPMail = async(req,res) =>{
+    let{email} = req.body;
+    try {
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+        const userExists = await User.find({email:email});
+            if(userExists.length<=0){
+                return res.status(401).json({message:"User is not registered with this email address"});
+            }else{
+                const mailOption = {
+                    from: process.env.SMTP_EMAIL,
+                    to: email,
+                    subject: "Reset Your Password | OTP ",
+                    template:'forgotPasswordOTP',
+                    context:{
+                        fullName: userExists[0].fullName,
+                        otp: otp,
+                            }
+                };
+                    transporter.sendMail(mailOption);
+                    transporter.close();
+            }   
+     
+
+       //Securing  the OTP - 
+       const hashOTP = await bcrypt.hash(otp,12); 
+       const newForgotPasswordOTP = await new forgotPasswordOTPModel({
+        userId: userExists[0]._id,
+        otp : hashOTP,
+        createdAt: Date.now(),
+        expiresAt : Date.now() + 60000,
+       });
+
+        await newForgotPasswordOTP.save();
+        return res.json({success:true,
+        message: "Verification otp Mail sent for resetting the password",
+        data:{
+            email,
+        },
+       });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+//Verify OTP Function to Reset Password
+exports.verifyOTPpasswordReset = async(req,res) =>{
+    try {
+        let{email,otp} = req.body;
+        const userExists = await User.find({email:email});
+        if(!userExists){
+            return res.status(401).json({message:"User is not registered with this email address"});
+        }else{
+            const userId = userExists[0]._id;
+            if(!userId || !otp){
+                throw Error("Empty otp details are not allowed");
+            }else{
+                 const ForgotOTPVerificationRecord = await forgotPasswordOTPModel.find({
+                    userId,
+                });
+                if(ForgotOTPVerificationRecord.length <= 0){
+                    //NO RECORD FOUND;
+                    throw new Error("User is not registered with this email address");
+                }else{
+                    const { expiresAt } = ForgotOTPVerificationRecord[0];
+                    const hashedOTP = ForgotOTPVerificationRecord[0].otp;
+                    if(expiresAt< Date.now()){
+                        //Otp has expired 
+                        await forgotPasswordOTPModel.deleteMany({userId});
+                        throw new Error("OTP EXPIRED");
+                    }else{
+                        const vaildOTP = await bcrypt.compare(otp,hashedOTP);
+    
+                        if(!vaildOTP){
+                            //supplied OTP is wrong
+                            throw new Error("OTP IS WRONG");
+                        }else{
+                            await forgotPasswordOTPModel.deleteMany({userId});
+                            return res.json({
+                                success:true,
+                                message:"Email Verified Successfully",
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+
+//Update Password API - 
+exports.resetPassword = async (req,res) => {
+    try {
+        let{email,newPassword} = req.body; 
+        const hashPassword = await bcrypt.hash(newPassword,12);   //Securing the password
+        await User.findOneAndUpdate({email:email},{password:hashPassword});
+    return res.status(200).json({success: false,message:"Password updated"})
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
