@@ -17,6 +17,8 @@ jobs:
           node-version: "18.x"
       - name: Install Dependencies
         run: npm install
+      - name: Running Node Application
+        run: node index.js
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
