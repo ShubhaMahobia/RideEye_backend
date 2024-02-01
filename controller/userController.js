@@ -49,6 +49,24 @@ exports.registerUser = async(req,res) => {
 }
 
 
+//Getuser API - 
+exports.getUser = async (req,res) =>{
+    let{userId} = req.body;
+    try {
+        if(!userId){
+            return res.status(400).json({success:false,message: " User id cannot be null"})
+        }
+        const user =  await User.find({_id:userId});
+        if(!user){
+            return res.status(400).json({success:false,message: " User not found"})
+        }
+        return res.status(200).json({user});
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message }); 
+    }
+}
+
+
 
 
 
