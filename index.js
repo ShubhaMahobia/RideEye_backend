@@ -16,7 +16,9 @@ app.use(express.json());
 app.use("/api", router);
 //Connection
 mongoose
-  .connect(process.env.Database_URL)
+  .connect(
+    "mongodb+srv://mahobiashubham4:w1lR2f44DxgJmPsV@rideeye.10znvnk.mongodb.net/RideEye"
+  )
   .then(() => console.log("Database connected"))
   .catch((err) => console.log("Mongo Connection Error " + err));
 
