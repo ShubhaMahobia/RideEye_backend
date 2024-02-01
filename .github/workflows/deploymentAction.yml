@@ -20,7 +20,7 @@ jobs:
       - name: "Create env file"
         run: |
           touch .env
-          echo Database_URL = mongodb://127.0.0.1:27017/ride_eye_dev >> .env
+          echo Database_URL = mongodb://localhost:27017 >> .env
           echo SMTP_EMAIL = mahobiashubham4@gmail.com >> .env
           echo SMTP_HOST = smtp.gmail.com >> .env
           echo SMTP_PASS = hutufymgqfwvnzdh >> .env
