@@ -19,7 +19,6 @@ exports.fetchAllUsers = async (req, res) => {
 
 //Create User Function
 exports.registerUser = async (req, res) => {
-  console.log("API HIT");
   const user = new User({
     fullName: req.body.fullName,
     email: req.body.email,
@@ -45,8 +44,7 @@ exports.registerUser = async (req, res) => {
     }
     await user.save().then((result) => {
       sendOtpVerificationEmail(result, res);
-    });
-    console.log("API Completed"); //SAVE COMMAND
+    }); //SAVE COMMAND
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
