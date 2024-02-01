@@ -13,6 +13,7 @@ exports.fetchAllUsers = async (req, res) => {
     res.json(results);
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+    console.log(error);
   }
 };
 
