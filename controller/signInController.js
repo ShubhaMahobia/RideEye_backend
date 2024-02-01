@@ -133,7 +133,11 @@ exports.removingUnverifiedEMails = async(res) => {
 //SignIn function - 
 exports.signIn = async (req,res) => {
   try {
-    userExists = await User.find({email:req.body.email}).exec().then(user=>{
+    const user = await User.find({email:req.body.email});
+    if(!user[0].verified){
+        await User.deleteMany({ email: req.body.email });
+        return res.status(401).json({ message: "User is not verified yet, try signing up again" });
+    }
         if(user.length<=0){
             return res.status(401).json({message:"User not Found"});
         }else{
@@ -142,16 +146,14 @@ exports.signIn = async (req,res) => {
             return res.status(401).json({message:"Password not correct"});
             }else{
                 const token = jwt.sign({email:user[0].email,userId:user[0]._id},process.env.SECRET_KEY,{expiresIn:process.env.JWT_TOKEN_EXPIRY});
-                res.status(200).json({
-                    email:user[0].email,
-                    userId:user[0]._id,
-                    token:token,
+                    res.status(200).json({
+                        email:user[0].email,
+                        userId:user[0]._id,
+                        token:token,
                 });
             }
-
             });
         }
-    })
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }   
@@ -254,7 +256,7 @@ exports.resetPassword = async (req,res) => {
         let{email,newPassword} = req.body; 
         const hashPassword = await bcrypt.hash(newPassword,12);   //Securing the password
         await User.findOneAndUpdate({email:email},{password:hashPassword});
-    return res.status(200).json({success: false,message:"Password updated"})
+    return res.status(200).json({success: true,message:"Password updated"})
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
