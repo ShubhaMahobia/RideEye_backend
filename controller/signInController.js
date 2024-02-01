@@ -190,7 +190,7 @@ exports.sendPasswordOTPMail = async(req,res) =>{
        });
 
         await newForgotPasswordOTP.save();
-        return res.json({
+        return res.json({success:true,
         message: "Verification otp Mail sent for resetting the password",
         data:{
             email,
@@ -242,6 +242,19 @@ exports.verifyOTPpasswordReset = async(req,res) =>{
                 }
             }
         }
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+
+//Update Password API - 
+exports.resetPassword = async (req,res) => {
+    try {
+        let{email,newPassword} = req.body; 
+        const hashPassword = await bcrypt.hash(newPassword,12);   //Securing the password
+        await User.findOneAndUpdate({email:email},{password:hashPassword});
+    return res.status(200).json({success: false,message:"Password updated"})
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
