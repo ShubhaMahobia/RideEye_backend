@@ -13,11 +13,13 @@ exports.fetchAllUsers = async (req, res) => {
     res.json(results);
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+    console.log(error);
   }
 };
 
 //Create User Function
 exports.registerUser = async (req, res) => {
+  console.log("API HIT");
   const user = new User({
     fullName: req.body.fullName,
     email: req.body.email,
@@ -43,7 +45,8 @@ exports.registerUser = async (req, res) => {
     }
     await user.save().then((result) => {
       sendOtpVerificationEmail(result, res);
-    }); //SAVE COMMAND
+    });
+    console.log("API Completed"); //SAVE COMMAND
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
