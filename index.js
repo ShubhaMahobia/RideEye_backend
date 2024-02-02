@@ -2,13 +2,12 @@ const mongoose = require("mongoose");
 var express = require("express");
 const schedule = require("node-schedule");
 require("dotenv").config();
-const router = require("../RideEye_backend/routes/user");
+const router = require("./routes/user");
 const { removingUnverifiedEMails } = require("./controller/signInController");
 var app = express();
-const PORT = process.env.PORT || 8080;
-
-app.listen(PORT, function () {
-  console.log(`Server Running on PORT ${PORT}`);
+const port = process.env.port || 8080;
+app.listen(port, function () {
+  console.log(`Server Running on PORT ${port}`);
 });
 
 app.use(express.json());
