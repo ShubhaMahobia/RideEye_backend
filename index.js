@@ -6,7 +6,6 @@ const router = require("./routes/user");
 const { removingUnverifiedEMails } = require("./controller/signInController");
 var app = express();
 const port = process.env.port || 8080;
-
 app.listen(port, function () {
   console.log(`Server Running on PORT ${port}`);
 });
