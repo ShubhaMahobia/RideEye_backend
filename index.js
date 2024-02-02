@@ -5,7 +5,7 @@ require("dotenv").config();
 const router = require("../RideEye_backend/routes/user");
 const { removingUnverifiedEMails } = require("./controller/signInController");
 var app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, function () {
   console.log(`Server Running on PORT ${PORT}`);

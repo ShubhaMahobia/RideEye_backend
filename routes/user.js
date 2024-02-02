@@ -3,6 +3,7 @@ const {
   fetchAllUsers,
   registerUser,
   getUser,
+  test,
 } = require("../controller/userController.js");
 const {
   verifyOTP,
@@ -14,6 +15,7 @@ const {
 } = require("../controller/signInController.js");
 const router = express.Router();
 
+router.get("/", test);
 router.get("/users", fetchAllUsers);
 router.post("/signUp", registerUser);
 router.post("/verifyOTP", verifyOTP);

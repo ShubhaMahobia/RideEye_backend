@@ -6,6 +6,14 @@ const UserOTPVerification = require("../models/userVerificationModel");
 const hbs = require("nodemailer-express-handlebars");
 const { sendOtpVerificationEmail } = require("./signInController");
 
+exports.test = (req, res) => {
+  try {
+    return res.status(200).json({ message: "Server is running" });
+  } catch (error) {
+    return res.status(400).json({ message: "Server is not running" });
+  }
+};
+
 //Fetch All User Function
 exports.fetchAllUsers = async (req, res) => {
   try {
