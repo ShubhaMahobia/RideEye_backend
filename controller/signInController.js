@@ -53,10 +53,12 @@ exports.sendOtpVerificationEmail = async ({ _id, email, fullName }, res) => {
     await newOtpVerification.save();
     transporter.sendMail(mailOption);
     return res.json({
+      success: true,
       message: "Verification otp Mail sent",
       data: {
         userId: _id,
         email,
+        otp: otp,
       },
     });
   } catch (error) {
