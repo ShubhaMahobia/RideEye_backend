@@ -10,10 +10,10 @@ require("dotenv").config();
 
 //NODEMAILER
 let transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: process.env.SMTP_HOST || smtp.gmail.com,
   auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_EMAIL || "mahobiashubham4@gmail.com",
+    pass: process.env.SMTP_PASS || "hutufymgqfwvnzdh",
   },
 });
 
@@ -154,8 +154,9 @@ exports.signIn = async (req, res) => {
         } else {
           const token = jwt.sign(
             { email: user[0].email, userId: user[0]._id },
-            process.env.SECRET_KEY,
-            { expiresIn: process.env.JWT_TOKEN_EXPIRY }
+            process.env.SECRET_KEY ||
+              "81012BB9A64888F4A27786E63DF9B5A65DBD04398402026F67D3B2525DFEDB2E",
+            { expiresIn: process.env.JWT_TOKEN_EXPIRY || "24h" }
           );
           res.status(200).json({
             email: user[0].email,
