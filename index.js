@@ -3,7 +3,10 @@ var express = require("express");
 const schedule = require("node-schedule");
 require("dotenv").config();
 const router = require("./routes/user");
-const { removingUnverifiedEMails } = require("./controller/signInController");
+const {
+  removingUnverifiedEMails,
+  removingOldOTPs,
+} = require("./controller/signInController");
 var app = express();
 const port = process.env.port || 8080;
 app.listen(port, function () {
@@ -24,4 +27,9 @@ mongoose
 //Cron Job to remove unverified Emails -
 schedule.scheduleJob("0 */12 * * *", () => {
   removingUnverifiedEMails();
+});
+
+//Cron Job to remove unverified otps -
+schedule.scheduleJob("*0 */12 * * *", () => {
+  removingOldOTPs();
 });

@@ -135,6 +135,17 @@ exports.removingUnverifiedEMails = async (res) => {
   }
 };
 
+//Removing old otp's
+exports.removingOldOTPs = async (res) => {
+  const currentDate = new Date();
+  try {
+    await UserOTPVerification.deleteMany({ expiresAt: { $lt: currentDate } });
+    console.log("Expired OTPs Deleted");
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 //SignIn function -
 exports.signIn = async (req, res) => {
   try {
