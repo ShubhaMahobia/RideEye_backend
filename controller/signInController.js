@@ -77,10 +77,12 @@ exports.verifyOTP = async (req, res) => {
         userId,
       });
       if (UserOTPVerificationRecord.length <= 0) {
+        res.status(400).json({
+          success: false,
+          message:
+            "Account record doesn't exist or has been verified already. Please sign up or login",
+        });
         //NO RECORD FOUND;
-        throw new Error(
-          "Account record doesn't exist or has been verified already. Please sign up or login"
-        );
       } else {
         const { expiresAt } = UserOTPVerificationRecord[0];
         const hashedOTP = UserOTPVerificationRecord[0].otp;
@@ -93,12 +95,16 @@ exports.verifyOTP = async (req, res) => {
           const vaildOTP = await bcrypt.compare(otp, hashedOTP);
 
           if (!vaildOTP) {
-            //supplied OTP is wrong
+            res.status(400).json({
+              success: false,
+              message: "OTP is not correct, Please try Again",
+            });
             throw new Error("OTP IS WRONG");
           } else {
             await User.updateOne({ _id: userId }, { verified: true });
             await UserOTPVerification.deleteMany({ userId });
             return res.json({
+              success: true,
               message: "Email Verified Successfully",
             });
           }
@@ -115,10 +121,13 @@ exports.resendOTP = async (req, res) => {
   try {
     let { userId, email } = req.body;
     if (!userId || !email) {
-      throw Error("Empty otp details are not allowed");
+      res
+        .status(400)
+        .json({ success: false, message: "Please enter valid details" });
     } else {
       await UserOTPVerification.deleteMany({ userId });
       this.sendOtpVerificationEmail({ _id: userId, email }, res);
+      res.status(200).json({ success: true, message: "OTP sent!!" });
     }
   } catch (e) {
     res.status(400).json({ success: false, message: error.message });
@@ -152,16 +161,21 @@ exports.signIn = async (req, res) => {
     const user = await User.find({ email: req.body.email });
     if (!user[0].verified) {
       await User.deleteMany({ email: req.body.email });
-      return res
-        .status(401)
-        .json({ message: "User is not verified yet, try signing up again" });
+      return res.status(401).json({
+        success: true,
+        message: "User is not verified yet, try signing up again",
+      });
     }
     if (user.length <= 0) {
-      return res.status(401).json({ message: "User not Found" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User not Found" });
     } else {
       bcrypt.compare(req.body.password, user[0].password, (err, result) => {
         if (!result) {
-          return res.status(401).json({ message: "Password not correct" });
+          return res
+            .status(401)
+            .json({ success: false, message: "Password not correct" });
         } else {
           const token = jwt.sign(
             { email: user[0].email, userId: user[0]._id },
@@ -170,6 +184,7 @@ exports.signIn = async (req, res) => {
             { expiresIn: process.env.JWT_TOKEN_EXPIRY || "24h" }
           );
           res.status(200).json({
+            success: true,
             email: user[0].email,
             userId: user[0]._id,
             token: token,
@@ -188,9 +203,10 @@ exports.sendPasswordOTPMail = async (req, res) => {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
     const userExists = await User.find({ email: email });
     if (userExists.length <= 0) {
-      return res
-        .status(401)
-        .json({ message: "User is not registered with this email address" });
+      return res.status(401).json({
+        success: false,
+        message: "User is not registered with this email address",
+      });
     } else {
       const mailOption = {
         from: process.env.SMTP_EMAIL,
@@ -233,9 +249,10 @@ exports.verifyOTPpasswordReset = async (req, res) => {
     let { email, otp } = req.body;
     const userExists = await User.find({ email: email });
     if (!userExists) {
-      return res
-        .status(401)
-        .json({ message: "User is not registered with this email address" });
+      return res.status(401).json({
+        success: false,
+        message: "User is not registered with this email address",
+      });
     } else {
       const userId = userExists[0]._id;
       if (!userId || !otp) {
@@ -246,20 +263,29 @@ exports.verifyOTPpasswordReset = async (req, res) => {
         });
         if (ForgotOTPVerificationRecord.length <= 0) {
           //NO RECORD FOUND;
-          throw new Error("User is not registered with this email address");
+          return res.status(401).json({
+            success: false,
+            message: "No record found!!",
+          });
         } else {
           const { expiresAt } = ForgotOTPVerificationRecord[0];
           const hashedOTP = ForgotOTPVerificationRecord[0].otp;
           if (expiresAt < Date.now()) {
             //Otp has expired
             await forgotPasswordOTPModel.deleteMany({ userId });
-            throw new Error("OTP EXPIRED");
+            return res.status(401).json({
+              success: false,
+              message: "Otp expired!!",
+            });
           } else {
             const vaildOTP = await bcrypt.compare(otp, hashedOTP);
 
             if (!vaildOTP) {
               //supplied OTP is wrong
-              throw new Error("OTP IS WRONG");
+              return res.status(401).json({
+                success: false,
+                message: "OTP is not correct",
+              });
             } else {
               await forgotPasswordOTPModel.deleteMany({ userId });
               return res.json({
