@@ -127,7 +127,6 @@ exports.resendOTP = async (req, res) => {
     } else {
       await UserOTPVerification.deleteMany({ userId });
       this.sendOtpVerificationEmail({ _id: userId, email }, res);
-      res.status(200).json({ success: true, message: "OTP sent!!" });
     }
   } catch (e) {
     res.status(400).json({ success: false, message: error.message });
