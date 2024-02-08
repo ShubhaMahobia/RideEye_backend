@@ -47,7 +47,7 @@ exports.sendOtpVerificationEmail = async ({ _id, email, fullName }, res) => {
       userId: _id,
       otp: hashOTP,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 60000,
+      expiresAt: Date.now() + 120000,
     });
 
     await newOtpVerification.save();
@@ -228,7 +228,7 @@ exports.sendPasswordOTPMail = async (req, res) => {
       userId: userExists[0]._id,
       otp: hashOTP,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 60000,
+      expiresAt: Date.now() + 120000,
     });
 
     await newForgotPasswordOTP.save();
