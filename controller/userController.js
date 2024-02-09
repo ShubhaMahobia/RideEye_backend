@@ -45,10 +45,14 @@ exports.registerUser = async (req, res) => {
     });
 
     if (userExistEmail) {
-      return res.json("Email Already Exist");
+      return res
+        .status(400)
+        .json({ success: false, message: "Email Already exist" });
     }
     if (userExistENo) {
-      return res.json("Enrollment Number Already Exist");
+      return res
+        .status(400)
+        .json({ success: false, message: "Enrollment Number Already exist" });
     }
     await user.save().then((result) => {
       sendOtpVerificationEmail(result, res);
@@ -65,13 +69,13 @@ exports.getUser = async (req, res) => {
     if (!userId) {
       return res
         .status(400)
-        .json({ success: false, message: " User id cannot be null" });
+        .json({ success: false, message: "User id cannot be null" });
     }
     const user = await User.find({ _id: userId });
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: " User not found" });
+        .json({ success: false, message: "User not found" });
     }
     return res.status(200).json({ user });
   } catch (error) {
