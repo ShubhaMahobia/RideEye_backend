@@ -8,7 +8,9 @@ const { sendOtpVerificationEmail } = require("./signInController");
 
 exports.test = (req, res) => {
   try {
-    return res.status(200).json({ message: "Server is running" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Server is running" });
   } catch (error) {
     return res.status(400).json({ message: "Server is not running" });
   }
@@ -63,21 +65,22 @@ exports.registerUser = async (req, res) => {
 };
 
 //Getuser API -
+//Fetching User Details Using email
 exports.getUser = async (req, res) => {
-  let { userId } = req.body;
+  let { email } = req.body;
   try {
-    if (!userId) {
+    if (!email) {
       return res
         .status(400)
-        .json({ success: false, message: "User id cannot be null" });
+        .json({ success: false, message: "User email cannot be null" });
     }
-    const user = await User.find({ _id: userId });
-    if (!user) {
+    const user = await User.find({ email: email });
+    if (!email) {
       return res
         .status(400)
         .json({ success: false, message: "User not found" });
     }
-    return res.status(200).json({ user });
+    return res.status(200).json({ success: true, data: user });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

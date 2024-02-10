@@ -177,7 +177,7 @@ exports.signIn = async (req, res) => {
             .json({ success: false, message: "Password not correct" });
         } else {
           const token = jwt.sign(
-            { email: user[0].email, userId: user[0]._id },
+            { email: user[0].email },
             process.env.SECRET_KEY ||
               "81012BB9A64888F4A27786E63DF9B5A65DBD04398402026F67D3B2525DFEDB2E",
             { expiresIn: process.env.JWT_TOKEN_EXPIRY || "24h" }
