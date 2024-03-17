@@ -15,8 +15,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18.x"
-      - name: Switiching To Client
-        run:  cd client
+      - name: Change to Client Directory
+        run: cd path/to/client
       - name: Install Dependencies
         run: npm install
       - name: Deploy to Azure App Service
