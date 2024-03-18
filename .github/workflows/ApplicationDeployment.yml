@@ -18,7 +18,9 @@ jobs:
       - name: Change to Client Directory
         run:  cd Client
       - name: Install Dependencies
-        run: npm install
+        run:  |
+              cd Client
+              npm install
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
