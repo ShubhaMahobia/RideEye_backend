@@ -64,7 +64,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-//Getuser API -
+//Get user API -
 //Fetching User Details Using email
 exports.getUser = async (req, res) => {
   let { email } = req.body;
@@ -85,3 +85,33 @@ exports.getUser = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+exports.updateUser = async (req, res) => {
+  let { fullNameNew, phoneNumberNew, scholarNumberNew, enrollmentNumberNew, userId } = req.body;
+  
+  if (fullNameNew == null || phoneNumberNew == null || scholarNumberNew == null || enrollmentNumberNew == null) {
+    return res.status(400).json({ success: false, message: 'Fields cannot be null' });
+  }
+  
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          fullName: fullNameNew,
+          phoneNumber: phoneNumberNew,
+          scholarNumber: scholarNumberNew,
+          enrollmentNumber: enrollmentNumberNew
+        }
+      },
+      { new: true } // This ensures you get the updated user document back
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.status(200).json({ success: true, message: 'User Updated Successfully', updatedUser });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}
+
