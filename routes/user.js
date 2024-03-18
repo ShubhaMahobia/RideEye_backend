@@ -4,6 +4,7 @@ const {
   registerUser,
   getUser,
   test,
+  updateUser,
 } = require("../controller/userController.js");
 const {
   verifyOTP,
@@ -25,5 +26,6 @@ router.post("/forgotpassreq", sendPasswordOTPMail);
 router.post("/forgotpassverify", verifyOTPpasswordReset);
 router.post("/updatepass", resetPassword);
 router.post("/getUser", getUser);
+router.put("/updateUser", updateUser);
 
 module.exports = router;
