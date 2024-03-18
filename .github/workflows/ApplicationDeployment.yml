@@ -15,12 +15,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18.x"
-      - name: Change to Client Directory
-        run:  cd Client
       - name: Install Dependencies
-        run:  |
-              cd Client
-              npm install
+        run: npm install
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
